@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cyberpunk Audio Classification</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <!-- Custom Styles -->
+    <style>
+        body {
+            background: linear-gradient(135deg, #141e30, #243b55);
+            font-family: 'Poppins', sans-serif;
+            color: #ecf0f1;
+            overflow-x: hidden;
+        }
+        h1 {
+            font-size: 3rem;
+            text-shadow: 0 0 10px #6a11cb, 0 0 20px #6a11cb;
+            margin-bottom: 20px;
+        }
+        p {
+            font-size: 1.2rem;
+            color: #dfe4ea;
+        }
+        .container {
+            margin-top: 50px;
+            text-align: center;
+        }
+        .btn-record {
+            background: linear-gradient(135deg, #6a11cb, #2575fc);
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            color: white;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .btn-record:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 20px #6a11cb, 0 0 40px #2575fc;
+        }
+        .btn-record::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.2);
+            transition: left 0.5s ease;
+        }
+        .btn-record:hover::before {
+            left: 100%;
+        }
+        .result-box {
+            margin-top: 30px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+            display: none;
+            backdrop-filter: blur(10px);
+        }
+        .result-box p {
+            font-size: 1.1rem;
+            margin: 10px 0;
+            color: #ecf0f1;
+        }
+        .loading-spinner {
+            display: none;
+            margin-top: 20px;
+            font-size: 1.5rem;
+            color: #6a11cb;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎤 Audio Classification App</h1>
+        <p>Speak into your microphone, and we'll classify your intent!</p>
+        <button id="recordButton" class="btn-record"><i class="fas fa-microphone"></i> Start Recording</button>
+        <div class="loading-spinner" id="spinner">
+            <i class="fas fa-circle-notch fa-spin"></i> Processing...
+        </div>
+        <div class="result-box" id="resultBox">
+            <h3>Results:</h3>
+            <p><strong>Transcription:</strong> <span id="transcription">...</span></p>
+            <p><strong>Intent:</strong> <span id="intent">...</span></p>
+        </div>
+    </div>
+
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <!-- Custom Script -->
+    <script>
+        $(document).ready(function () {
+            const recordButton = $('#recordButton');
+            const spinner = $('#spinner');
+            const resultBox = $('#resultBox');
+            const transcription = $('#transcription');
+            const intent = $('#intent');
+
+            recordButton.click(function () {
+                // Disable button and show spinner
+                recordButton.prop('disabled', true);
+                spinner.show();
+
+                // Send POST request to process audio
+                $.ajax({
+                    url: '/process_audio',
+                    method: 'POST',
+                    success: function (response) {
+                        // Update results
+                        transcription.text(response.transcription);
+                        intent.text(response.intent);
+
+                        // Show result box and hide spinner
+                        resultBox.fadeIn();
+                        spinner.hide();
+                    },
+                    error: function () {
+                        alert('An error occurred while processing your audio.');
+                        spinner.hide();
+                    },
+                    complete: function () {
+                        // Re-enable button
+                        recordButton.prop('disabled', false);
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
